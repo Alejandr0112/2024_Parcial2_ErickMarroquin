@@ -1,0 +1,54 @@
+#include <iostream>
+#include <filesystem>
+#include <fstream>
+#include <windows.h>
+#include <shlobj.h>
+
+namespace fs = std::filesystem;
+
+void createFiles(int numFiles, const std::string& folderPath) {
+    std::string parFolderPath = folderPath + "\\par";
+    std::string imparFolderPath = folderPath + "\\impar";
+    fs::create_directory(parFolderPath);
+    fs::create_directory(imparFolderPath);
+
+    //Aca empezamos con el ejercicio 2, donde se añaden lineas de texto segun el numero de archivo//
+    for (int i = 1; i <= numFiles; ++i) {
+        std::string folderName = (i % 2 == 0) ? parFolderPath : imparFolderPath;
+        std::string fileName = folderName + "\\File" + std::to_string(i);
+        std::ofstream file(fileName);
+        if (!file.is_open()) {
+            std::cerr << "Error: No se pudo crear el archivo " << fileName << std::endl;
+        } else {
+            std::cout << "Archivo creado: " << fileName << std::endl;
+            for (int j = 1; j <= i; ++j) {
+                file << j << ". linea de texto \n";
+            }
+            file.close();
+        }
+    }
+}
+
+int main() {
+    int numFiles;
+    std::cout << "Cuantos archivos desea crear: ";
+    std::cin >> numFiles;
+
+    if (numFiles <= 0) {
+        std::cerr << "Error: Numero invalido de archivos." << std::endl;
+        return 1;
+    }
+
+    char desktopPath[MAX_PATH];
+    if (SHGetFolderPath(NULL, CSIDL_DESKTOP, NULL, 0, desktopPath) != S_OK) {
+        std::cerr << "Error: No se pudo obtener la ruta del escritorio." << std::endl;
+        return 1;
+    }
+
+    std::string folderPath = std::string(desktopPath);
+    std::cout << "La ruta del escritorio es: " << folderPath << std::endl;
+
+    createFiles(numFiles, folderPath);
+
+    return 0;
+}
